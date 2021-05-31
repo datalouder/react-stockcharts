@@ -1,36 +1,37 @@
+import { rebind, merge } from '../utils';
 
+import { sma } from '../calculator';
+import baseIndicator from './baseIndicator';
 
-import { rebind, merge } from "../utils";
+const ALGORITHM_TYPE = 'SMA';
 
-import { sma } from "../calculator";
-import baseIndicator from "./baseIndicator";
+export default function () {
+  const base = baseIndicator()
+    .type(ALGORITHM_TYPE)
+    .accessor(d => d.sma);
 
-const ALGORITHM_TYPE = "SMA";
+  const underlyingAlgorithm = sma();
 
-export default function() {
+  const mergedAlgorithm = merge()
+    .algorithm(underlyingAlgorithm)
+    .merge((datum, indicator) => {
+      datum.sma = indicator;
+    });
 
-	const base = baseIndicator()
-		.type(ALGORITHM_TYPE)
-		.accessor(d => d.sma);
+  const indicator = function (data, options = { merge: true }) {
+    if (options.merge) {
+      if (!base.accessor())
+        throw new Error(
+          `Set an accessor to ${ALGORITHM_TYPE} before calculating`
+        );
+      return mergedAlgorithm(data);
+    }
+    return underlyingAlgorithm(data);
+  };
+  rebind(indicator, base, 'id', 'accessor', 'stroke', 'fill', 'echo', 'type');
+  rebind(indicator, underlyingAlgorithm, 'undefinedLength');
+  rebind(indicator, underlyingAlgorithm, 'options');
+  rebind(indicator, mergedAlgorithm, 'merge', 'skipUndefined');
 
-	const underlyingAlgorithm = sma();
-
-	const mergedAlgorithm = merge()
-		.algorithm(underlyingAlgorithm)
-		.merge((datum, indicator) => { datum.sma = indicator; });
-
-	const indicator = function(data, options = { merge: true }) {
-		if (options.merge) {
-			if (!base.accessor()) throw new Error(`Set an accessor to ${ALGORITHM_TYPE} before calculating`);
-			return mergedAlgorithm(data);
-		}
-		return underlyingAlgorithm(data);
-	};
-	rebind(indicator, base, "id", "accessor", "stroke", "fill", "echo", "type");
-	rebind(indicator, underlyingAlgorithm, "undefinedLength");
-	rebind(indicator, underlyingAlgorithm, "options");
-	rebind(indicator, mergedAlgorithm, "merge", "skipUndefined");
-
-
-	return indicator;
+  return indicator;
 }

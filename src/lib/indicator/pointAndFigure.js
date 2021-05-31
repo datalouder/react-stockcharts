@@ -1,25 +1,21 @@
+import { rebind } from '../utils';
 
+import { pointAndFigure } from '../calculator';
+import baseIndicator from './baseIndicator';
 
-import { rebind } from "../utils";
+const ALGORITHM_TYPE = 'PointAndFigure';
 
-import { pointAndFigure } from "../calculator";
-import baseIndicator from "./baseIndicator";
+export default function () {
+  const base = baseIndicator().type(ALGORITHM_TYPE);
 
-const ALGORITHM_TYPE = "PointAndFigure";
+  const underlyingAlgorithm = pointAndFigure();
 
-export default function() {
+  const indicator = underlyingAlgorithm;
 
-	const base = baseIndicator()
-		.type(ALGORITHM_TYPE);
+  rebind(indicator, base, 'id', 'stroke', 'fill', 'echo', 'type');
+  rebind(indicator, underlyingAlgorithm, 'dateAccessor', 'dateMutator');
+  rebind(indicator, underlyingAlgorithm, 'options');
+  // rebind(indicator, mergedAlgorithm, "merge"/*, "skipUndefined"*/);
 
-	const underlyingAlgorithm = pointAndFigure();
-
-	const indicator = underlyingAlgorithm;
-
-	rebind(indicator, base, "id", "stroke", "fill", "echo", "type");
-	rebind(indicator, underlyingAlgorithm, "dateAccessor", "dateMutator");
-	rebind(indicator, underlyingAlgorithm, "options");
-	// rebind(indicator, mergedAlgorithm, "merge"/*, "skipUndefined"*/);
-
-	return indicator;
+  return indicator;
 }

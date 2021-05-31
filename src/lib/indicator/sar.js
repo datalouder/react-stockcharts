@@ -1,37 +1,39 @@
+import { rebind, merge } from '../utils';
 
+import { sar } from '../calculator';
 
-import { rebind, merge } from "../utils";
+import baseIndicator from './baseIndicator';
 
-import { sar } from "../calculator";
+const ALGORITHM_TYPE = 'SMA';
 
-import baseIndicator from "./baseIndicator";
+export default function () {
+  const base = baseIndicator()
+    .type(ALGORITHM_TYPE)
+    .accessor(d => d.sar);
 
-const ALGORITHM_TYPE = "SMA";
+  const underlyingAlgorithm = sar();
 
-export default function() {
+  const mergedAlgorithm = merge()
+    .algorithm(underlyingAlgorithm)
+    .merge((datum, indicator) => {
+      datum.sar = indicator;
+    });
 
-	const base = baseIndicator()
-		.type(ALGORITHM_TYPE)
-		.accessor(d => d.sar);
+  const indicator = function (data, options = { merge: true }) {
+    if (options.merge) {
+      if (!base.accessor())
+        throw new Error(
+          `Set an accessor to ${ALGORITHM_TYPE} before calculating`
+        );
+      return mergedAlgorithm(data);
+    }
+    return underlyingAlgorithm(data);
+  };
 
-	const underlyingAlgorithm = sar();
+  rebind(indicator, base, 'id', 'accessor', 'stroke', 'echo', 'type');
+  rebind(indicator, underlyingAlgorithm, 'undefinedLength');
+  rebind(indicator, underlyingAlgorithm, 'options');
+  rebind(indicator, mergedAlgorithm, 'merge');
 
-	const mergedAlgorithm = merge()
-		.algorithm(underlyingAlgorithm)
-		.merge((datum, indicator) => { datum.sar = indicator; });
-
-	const indicator = function(data, options = { merge: true }) {
-		if (options.merge) {
-			if (!base.accessor()) throw new Error(`Set an accessor to ${ALGORITHM_TYPE} before calculating`);
-			return mergedAlgorithm(data);
-		}
-		return underlyingAlgorithm(data);
-	};
-
-	rebind(indicator, base, "id", "accessor", "stroke", "echo", "type");
-	rebind(indicator, underlyingAlgorithm, "undefinedLength");
-	rebind(indicator, underlyingAlgorithm, "options");
-	rebind(indicator, mergedAlgorithm, "merge");
-
-	return indicator;
+  return indicator;
 }

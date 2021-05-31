@@ -1,36 +1,35 @@
+import { slidingWindow, path } from '../utils';
+import { ForceIndex as defaultOptions } from './defaultOptionsForComputation';
 
+export default function () {
+  let options = defaultOptions;
 
-import { slidingWindow, path } from "../utils";
-import { ForceIndex as defaultOptions } from "./defaultOptionsForComputation";
+  function calculator(data) {
+    const { sourcePath, volumePath } = options;
 
-export default function() {
+    const source = path(sourcePath);
+    const volume = path(volumePath);
 
-	let options = defaultOptions;
+    const forceIndexCalulator = slidingWindow()
+      .windowSize(2)
+      .accumulator(
+        ([prev, curr]) => (source(curr) - source(prev)) * volume(curr)
+      );
 
-	function calculator(data) {
-		const { sourcePath, volumePath } = options;
+    const forceIndex = forceIndexCalulator(data);
 
-		const source = path(sourcePath);
-		const volume = path(volumePath);
+    return forceIndex;
+  }
+  calculator.undefinedLength = function () {
+    return 2;
+  };
+  calculator.options = function (x) {
+    if (!arguments.length) {
+      return options;
+    }
+    options = { ...defaultOptions, ...x };
+    return calculator;
+  };
 
-		const forceIndexCalulator = slidingWindow()
-			.windowSize(2)
-			.accumulator(([prev, curr]) => (source(curr) - source(prev)) * volume(curr));
-
-		const forceIndex = forceIndexCalulator(data);
-
-		return forceIndex;
-	}
-	calculator.undefinedLength = function() {
-		return 2;
-	};
-	calculator.options = function(x) {
-		if (!arguments.length) {
-			return options;
-		}
-		options = { ...defaultOptions, ...x };
-		return calculator;
-	};
-
-	return calculator;
+  return calculator;
 }

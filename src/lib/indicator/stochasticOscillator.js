@@ -1,34 +1,36 @@
+import { rebind, merge } from '../utils';
 
+import { sto } from '../calculator';
 
-import { rebind, merge } from "../utils";
+import baseIndicator from './baseIndicator';
 
-import { sto } from "../calculator";
+const ALGORITHM_TYPE = 'STO';
 
-import baseIndicator from "./baseIndicator";
+export default function () {
+  const base = baseIndicator().type(ALGORITHM_TYPE);
 
-const ALGORITHM_TYPE = "STO";
+  const underlyingAlgorithm = sto();
 
-export default function() {
-	const base = baseIndicator()
-		.type(ALGORITHM_TYPE);
+  const mergedAlgorithm = merge()
+    .algorithm(underlyingAlgorithm)
+    .merge((datum, indicator) => {
+      datum.sto = indicator;
+    });
 
-	const underlyingAlgorithm = sto();
+  const indicator = function (data, options = { merge: true }) {
+    if (options.merge) {
+      if (!base.accessor())
+        throw new Error(
+          `Set an accessor to ${ALGORITHM_TYPE} before calculating`
+        );
+      return mergedAlgorithm(data);
+    }
+    return underlyingAlgorithm(data);
+  };
 
-	const mergedAlgorithm = merge()
-		.algorithm(underlyingAlgorithm)
-		.merge((datum, indicator) => { datum.sto = indicator; });
+  rebind(indicator, base, 'id', 'accessor', 'stroke', 'fill', 'echo', 'type');
+  rebind(indicator, underlyingAlgorithm, 'options', 'undefinedLength');
+  rebind(indicator, mergedAlgorithm, 'merge', 'skipUndefined');
 
-	const indicator = function(data, options = { merge: true }) {
-		if (options.merge) {
-			if (!base.accessor()) throw new Error(`Set an accessor to ${ALGORITHM_TYPE} before calculating`);
-			return mergedAlgorithm(data);
-		}
-		return underlyingAlgorithm(data);
-	};
-
-	rebind(indicator, base, "id", "accessor", "stroke", "fill", "echo", "type");
-	rebind(indicator, underlyingAlgorithm, "options", "undefinedLength");
-	rebind(indicator, mergedAlgorithm, "merge", "skipUndefined");
-
-	return indicator;
+  return indicator;
 }

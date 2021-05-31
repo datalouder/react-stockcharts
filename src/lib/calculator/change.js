@@ -1,37 +1,35 @@
+import { slidingWindow } from '../utils';
+import { Change as defaultOptions } from './defaultOptionsForComputation';
 
+export default function () {
+  let options = defaultOptions;
 
-import { slidingWindow } from "../utils";
-import { Change as defaultOptions } from "./defaultOptionsForComputation";
+  function calculator(data) {
+    const { sourcePath } = options;
 
-export default function() {
-	let options = defaultOptions;
+    const algo = slidingWindow()
+      .windowSize(2)
+      .sourcePath(sourcePath)
+      .accumulator(([prev, curr]) => {
+        const absoluteChange = curr - prev;
+        const percentChange = (absoluteChange * 100) / prev;
+        return { absoluteChange, percentChange };
+      });
 
-	function calculator(data) {
-		const { sourcePath } = options;
+    const newData = algo(data);
 
-		const algo = slidingWindow()
-			.windowSize(2)
-			.sourcePath(sourcePath)
-			.accumulator(([prev, curr]) => {
-				const absoluteChange = curr - prev;
-				const percentChange = absoluteChange * 100 / prev;
-				return { absoluteChange, percentChange };
-			});
+    return newData;
+  }
+  calculator.undefinedLength = function () {
+    return 1;
+  };
+  calculator.options = function (x) {
+    if (!arguments.length) {
+      return options;
+    }
+    options = { ...defaultOptions, ...x };
+    return calculator;
+  };
 
-		const newData = algo(data);
-
-		return newData;
-	}
-	calculator.undefinedLength = function() {
-		return 1;
-	};
-	calculator.options = function(x) {
-		if (!arguments.length) {
-			return options;
-		}
-		options = { ...defaultOptions, ...x };
-		return calculator;
-	};
-
-	return calculator;
+  return calculator;
 }

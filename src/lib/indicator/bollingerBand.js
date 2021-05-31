@@ -1,34 +1,35 @@
+import { rebind, merge } from '../utils';
 
+import baseIndicator from './baseIndicator';
+import { bollingerband } from '../calculator';
 
-import { rebind, merge } from "../utils";
+const ALGORITHM_TYPE = 'BollingerBand';
 
-import baseIndicator from "./baseIndicator";
-import { bollingerband } from "../calculator";
+export default function () {
+  const base = baseIndicator().type(ALGORITHM_TYPE);
 
-const ALGORITHM_TYPE = "BollingerBand";
+  const underlyingAlgorithm = bollingerband();
 
-export default function() {
+  const mergedAlgorithm = merge()
+    .algorithm(underlyingAlgorithm)
+    .merge((datum, indicator) => {
+      datum.bollingerBand = indicator;
+    });
 
-	const base = baseIndicator()
-		.type(ALGORITHM_TYPE);
+  const indicator = function (data, options = { merge: true }) {
+    if (options.merge) {
+      if (!base.accessor())
+        throw new Error(
+          `Set an accessor to ${ALGORITHM_TYPE} before calculating`
+        );
+      return mergedAlgorithm(data);
+    }
+    return underlyingAlgorithm(data);
+  };
 
-	const underlyingAlgorithm = bollingerband();
+  rebind(indicator, base, 'id', 'accessor', 'stroke', 'fill', 'echo', 'type');
+  rebind(indicator, underlyingAlgorithm, 'options');
+  rebind(indicator, mergedAlgorithm, 'merge', 'skipUndefined');
 
-	const mergedAlgorithm = merge()
-		.algorithm(underlyingAlgorithm)
-		.merge((datum, indicator) => { datum.bollingerBand = indicator; });
-
-	const indicator = function(data, options = { merge: true }) {
-		if (options.merge) {
-			if (!base.accessor()) throw new Error(`Set an accessor to ${ALGORITHM_TYPE} before calculating`);
-			return mergedAlgorithm(data);
-		}
-		return underlyingAlgorithm(data);
-	};
-
-	rebind(indicator, base, "id", "accessor", "stroke", "fill", "echo", "type");
-	rebind(indicator, underlyingAlgorithm, "options");
-	rebind(indicator, mergedAlgorithm, "merge", "skipUndefined");
-
-	return indicator;
+  return indicator;
 }

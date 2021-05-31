@@ -1,43 +1,40 @@
+import { sum } from 'd3-array';
 
+import { slidingWindow } from '../utils';
+import { WMA as defaultOptions } from './defaultOptionsForComputation';
 
-import { sum } from "d3-array";
+export default function () {
+  let options = defaultOptions;
 
-import { slidingWindow } from "../utils";
-import { WMA as defaultOptions } from "./defaultOptionsForComputation";
+  function calculator(data) {
+    const { windowSize, sourcePath } = options;
 
-export default function() {
+    const weight = (windowSize * (windowSize + 1)) / 2;
 
-	let options = defaultOptions;
+    const waverage = slidingWindow()
+      .windowSize(windowSize)
+      .sourcePath(sourcePath)
+      .accumulator(values => {
+        const total = sum(values, (v, i) => {
+          return (i + 1) * v;
+        });
+        return total / weight;
+      });
 
-	function calculator(data)    {
-		const { windowSize, sourcePath } = options;
+    return waverage(data);
+  }
+  calculator.undefinedLength = function () {
+    const { windowSize } = options;
 
-		const weight = windowSize * (windowSize + 1) / 2;
+    return windowSize - 1;
+  };
+  calculator.options = function (x) {
+    if (!arguments.length) {
+      return options;
+    }
+    options = { ...defaultOptions, ...x };
+    return calculator;
+  };
 
-		const waverage = slidingWindow()
-			.windowSize(windowSize)
-			.sourcePath(sourcePath)
-			.accumulator(values => {
-				const total = sum(values, (v, i) => {
-					return (i + 1) * v;
-				});
-				return total / weight;
-			});
-
-		return waverage(data);
-	}
-	calculator.undefinedLength = function() {
-		const { windowSize } = options;
-
-		return windowSize - 1;
-	};
-	calculator.options = function(x) {
-		if (!arguments.length) {
-			return options;
-		}
-		options = { ...defaultOptions, ...x };
-		return calculator;
-	};
-
-	return calculator;
+  return calculator;
 }

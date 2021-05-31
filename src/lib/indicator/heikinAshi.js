@@ -1,37 +1,37 @@
+import { heikinAshi } from '../calculator';
+import baseIndicator from './baseIndicator';
 
+import { rebind, merge } from '../utils';
 
-import { heikinAshi } from "../calculator";
-import baseIndicator from "./baseIndicator";
+const ALGORITHM_TYPE = 'HeikinAshi';
 
-import { rebind, merge } from "../utils";
+export default function () {
+  const base = baseIndicator()
+    .type(ALGORITHM_TYPE)
+    .accessor(d => d.ha);
 
-const ALGORITHM_TYPE = "HeikinAshi";
+  const underlyingAlgorithm = heikinAshi();
 
-export default function() {
+  const mergedAlgorithm = merge()
+    .algorithm(underlyingAlgorithm)
+    .merge((datum, indicator) => {
+      return { ...datum, ...indicator };
+    });
 
-	const base = baseIndicator()
-		.type(ALGORITHM_TYPE)
-		.accessor(d => d.ha);
+  const indicator = function (data, options = { merge: true }) {
+    if (options.merge) {
+      if (!base.accessor())
+        throw new Error(
+          `Set an accessor to ${ALGORITHM_TYPE} before calculating`
+        );
+      return mergedAlgorithm(data);
+    }
+    return underlyingAlgorithm(data);
+  };
 
-	const underlyingAlgorithm = heikinAshi();
+  rebind(indicator, base, 'accessor', 'stroke', 'fill', 'echo', 'type');
+  // rebind(indicator, underlyingAlgorithm, "windowSize", "source");
+  rebind(indicator, mergedAlgorithm, 'merge');
 
-	const mergedAlgorithm = merge()
-		.algorithm(underlyingAlgorithm)
-		.merge((datum, indicator) => {
-			return { ...datum, ...indicator };
-		});
-
-	const indicator = function(data, options = { merge: true }) {
-		if (options.merge) {
-			if (!base.accessor()) throw new Error(`Set an accessor to ${ALGORITHM_TYPE} before calculating`);
-			return mergedAlgorithm(data);
-		}
-		return underlyingAlgorithm(data);
-	};
-
-	rebind(indicator, base, "accessor", "stroke", "fill", "echo", "type");
-	// rebind(indicator, underlyingAlgorithm, "windowSize", "source");
-	rebind(indicator, mergedAlgorithm, "merge");
-
-	return indicator;
+  return indicator;
 }
