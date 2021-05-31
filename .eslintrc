@@ -55,32 +55,6 @@
 		"react/prop-types": 1,
 		"react/react-in-jsx-scope": 1,
 
-		"const-immutable/no-mutation": 2,
-
-		"no-var": "error",
-		"prefer-const": "error",
-		"array-bracket-spacing": [2, "never"],
-		"block-scoped-var": 2,
-		"brace-style": [2, "1tbs", { "allowSingleLine": true }],
-		"comma-spacing": [2, {"before": false, "after": true}],
-		"eqeqeq": [2, "smart"],
-		"key-spacing": [2, { "beforeColon": false, "afterColon": true }],
-		"indent": [2, "tab", { "SwitchCase": 1 }],
-		"comma-dangle": 0,
-		"jsx-quotes": [2, "prefer-double"],
-		"no-mixed-spaces-and-tabs": [2, "smart-tabs"],
-		"no-trailing-spaces": [2, { "skipBlankLines": false }],
-		"no-undef": 2,
-		"no-console": 0,
-		"no-unused-vars": 2,
-		"object-curly-spacing": [2, "always"],
-		"quotes": [2, "double", "avoid-escape"],
-		"semi": [2, "always"],
-		"semi-spacing": [2, { "before": false, "after": true }],
-		"keyword-spacing": ["error", {"before": true, "after": true, "overrides": {}}],
-		"space-before-blocks": 2,
-		"space-before-function-paren": [2, "never"],
-		"space-infix-ops": [2, { "int32Hint": false}],
-		"spaced-comment": [2, "always", { "exceptions": ["-"] }],
+		"const-immutable/no-mutation": 2
 	}
 }
