@@ -592,6 +592,8 @@ var ChartCanvas = function (_Component) {
   }, {
     key: 'handlePinchZoomEnd',
     value: function handlePinchZoomEnd(initialPinch, e) {
+      var _this3 = this;
+
       var xAccessor = this.state.xAccessor;
 
 
@@ -618,12 +620,17 @@ var ChartCanvas = function (_Component) {
           if (start < end) {
             onLoadMore(start, end);
           }
+          if (_this3.props.onXScaleChange) {
+            _this3.props.onXScaleChange(xScale);
+          }
         });
       }
     }
   }, {
     key: 'handleZoom',
     value: function handleZoom(zoomDirection, mouseXY, e) {
+      var _this4 = this;
+
       if (this.panInProgress) return;
       // console.log("zoomDirection ", zoomDirection, " mouseXY ", mouseXY);
       var _state4 = this.state,
@@ -690,11 +697,16 @@ var ChartCanvas = function (_Component) {
         if (start < end) {
           onLoadMore(start, end);
         }
+        if (_this4.props.onXScaleChange) {
+          _this4.props.onXScaleChange(xScale);
+        }
       });
     }
   }, {
     key: 'xAxisZoom',
     value: function xAxisZoom(newDomain) {
+      var _this5 = this;
+
       var _calculateStateForDom2 = this.calculateStateForDomain(newDomain),
           xScale = _calculateStateForDom2.xScale,
           plotData = _calculateStateForDom2.plotData,
@@ -717,6 +729,9 @@ var ChartCanvas = function (_Component) {
         chartConfig: chartConfig
       }, function () {
         if (start < end) onLoadMore(start, end);
+        if (_this5.props.onXScaleChange) {
+          _this5.props.onXScaleChange(xScale);
+        }
       });
     }
   }, {
@@ -745,14 +760,14 @@ var ChartCanvas = function (_Component) {
   }, {
     key: 'triggerEvent',
     value: function triggerEvent(type, props, e) {
-      var _this3 = this;
+      var _this6 = this;
 
       // console.log("triggering ->", type);
 
       this.subscriptions.forEach(function (each) {
-        var state = _extends({}, _this3.state, {
-          fullData: _this3.fullData,
-          subscriptions: _this3.subscriptions
+        var state = _extends({}, _this6.state, {
+          fullData: _this6.fullData,
+          subscriptions: _this6.subscriptions
         });
         each.listener(type, props, state, e);
       });
@@ -819,7 +834,7 @@ var ChartCanvas = function (_Component) {
   }, {
     key: 'handlePan',
     value: function handlePan(mousePosition, panStartXScale, dxdy, chartsToPan, e) {
-      var _this4 = this;
+      var _this7 = this;
 
       if (!this.waitingForPanAnimationFrame) {
         this.waitingForPanAnimationFrame = true;
@@ -843,16 +858,16 @@ var ChartCanvas = function (_Component) {
           currentCharts: state.currentCharts
         };
         requestAnimationFrame(function () {
-          _this4.waitingForPanAnimationFrame = false;
-          _this4.clearBothCanvas();
-          _this4.draw({ trigger: 'pan' });
+          _this7.waitingForPanAnimationFrame = false;
+          _this7.clearBothCanvas();
+          _this7.draw({ trigger: 'pan' });
         });
       }
     }
   }, {
     key: 'handlePanEnd',
     value: function handlePanEnd(mousePosition, panStartXScale, dxdy, chartsToPan, e) {
-      var _this5 = this;
+      var _this8 = this;
 
       var state = this.panHelper(mousePosition, panStartXScale, dxdy, chartsToPan);
       // console.log(this.canvasDrawCallbackList.map(d => d.type));
@@ -870,8 +885,8 @@ var ChartCanvas = function (_Component) {
       this.triggerEvent('panend', state, e);
 
       requestAnimationFrame(function () {
-        var xAccessor = _this5.state.xAccessor;
-        var fullData = _this5.fullData;
+        var xAccessor = _this8.state.xAccessor;
+        var fullData = _this8.fullData;
 
 
         var firstItem = head(fullData);
@@ -879,17 +894,20 @@ var ChartCanvas = function (_Component) {
         var end = xAccessor(firstItem);
         // console.log(start, end, start < end ? "Load more" : "I have it");
 
-        var onLoadMore = _this5.props.onLoadMore;
+        var onLoadMore = _this8.props.onLoadMore;
 
 
-        _this5.clearThreeCanvas();
+        _this8.clearThreeCanvas();
 
-        _this5.setState({
+        _this8.setState({
           xScale: xScale,
           plotData: plotData,
           chartConfig: chartConfig
         }, function () {
           if (start < end) onLoadMore(start, end);
+          if (_this8.props.onXScaleChange) {
+            _this8.props.onXScaleChange(xScale);
+          }
         });
       });
     }
@@ -908,7 +926,7 @@ var ChartCanvas = function (_Component) {
   }, {
     key: 'handleMouseMove',
     value: function handleMouseMove(mouseXY, inputType, e) {
-      var _this6 = this;
+      var _this9 = this;
 
       if (!this.waitingForMouseMoveAnimationFrame) {
         this.waitingForMouseMoveAnimationFrame = true;
@@ -938,9 +956,9 @@ var ChartCanvas = function (_Component) {
         };
 
         requestAnimationFrame(function () {
-          _this6.clearMouseCanvas();
-          _this6.draw({ trigger: 'mousemove' });
-          _this6.waitingForMouseMoveAnimationFrame = false;
+          _this9.clearMouseCanvas();
+          _this9.draw({ trigger: 'mousemove' });
+          _this9.waitingForMouseMoveAnimationFrame = false;
         });
       }
     }
@@ -961,7 +979,7 @@ var ChartCanvas = function (_Component) {
   }, {
     key: 'handleDrag',
     value: function handleDrag(_ref4, e) {
-      var _this7 = this;
+      var _this10 = this;
 
       var startPos = _ref4.startPos,
           mouseXY = _ref4.mouseXY;
@@ -988,34 +1006,34 @@ var ChartCanvas = function (_Component) {
       };
 
       requestAnimationFrame(function () {
-        _this7.clearMouseCanvas();
-        _this7.draw({ trigger: 'drag' });
+        _this10.clearMouseCanvas();
+        _this10.draw({ trigger: 'drag' });
       });
     }
   }, {
     key: 'handleDragEnd',
     value: function handleDragEnd(_ref5, e) {
-      var _this8 = this;
+      var _this11 = this;
 
       var mouseXY = _ref5.mouseXY;
 
       this.triggerEvent('dragend', { mouseXY: mouseXY }, e);
 
       requestAnimationFrame(function () {
-        _this8.clearMouseCanvas();
-        _this8.draw({ trigger: 'dragend' });
+        _this11.clearMouseCanvas();
+        _this11.draw({ trigger: 'dragend' });
       });
     }
   }, {
     key: 'handleClick',
     value: function handleClick(mousePosition, e) {
-      var _this9 = this;
+      var _this12 = this;
 
       this.triggerEvent('click', this.mutableState, e);
 
       requestAnimationFrame(function () {
-        _this9.clearMouseCanvas();
-        _this9.draw({ trigger: 'click' });
+        _this12.clearMouseCanvas();
+        _this12.draw({ trigger: 'click' });
       });
     }
   }, {
@@ -1059,11 +1077,16 @@ var ChartCanvas = function (_Component) {
           state = _objectWithoutProperties(_resetChart, ['fullData']);
 
       this.setState(state);
+      if (this.props.onXScaleChange) {
+        this.props.onXScaleChange(state.xScale);
+      }
       this.fullData = fullData;
     }
   }, {
     key: 'componentWillReceiveProps',
     value: function componentWillReceiveProps(nextProps) {
+      var _this13 = this;
+
       var reset = shouldResetChart(this.props, nextProps);
 
       var interaction = isInteractionEnabled(this.state.xScale, this.state.xAccessor, this.state.plotData);
@@ -1122,7 +1145,11 @@ var ChartCanvas = function (_Component) {
         */
         this.clearThreeCanvas();
 
-        this.setState(state);
+        this.setState(state, function () {
+          if (_this13.props.onXScaleChange) {
+            _this13.props.onXScaleChange(state.xScale);
+          }
+        });
       }
       this.fullData = fullData;
     }
@@ -1332,7 +1359,8 @@ ChartCanvas.propTypes = {
   zoomEvent: PropTypes.bool,
   onSelect: PropTypes.func,
   maintainPointsPerPixelOnResize: PropTypes.bool,
-  disableInteraction: PropTypes.bool
+  disableInteraction: PropTypes.bool,
+  onXScaleChange: PropTypes.func
 };
 
 ChartCanvas.defaultProps = {
