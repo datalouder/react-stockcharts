@@ -657,6 +657,9 @@ class ChartCanvas extends Component {
         if (start < end) {
           onLoadMore(start, end);
         }
+        if (this.props.onXScaleChange) {
+          this.props.onXScaleChange(xScale);
+        }
       });
     }
   }
@@ -729,6 +732,9 @@ class ChartCanvas extends Component {
         if (start < end) {
           onLoadMore(start, end);
         }
+        if (this.props.onXScaleChange) {
+          this.props.onXScaleChange(xScale);
+        }
       }
     );
   }
@@ -752,6 +758,9 @@ class ChartCanvas extends Component {
       },
       () => {
         if (start < end) onLoadMore(start, end);
+        if (this.props.onXScaleChange) {
+          this.props.onXScaleChange(xScale);
+        }
       }
     );
   }
@@ -934,6 +943,9 @@ class ChartCanvas extends Component {
         },
         () => {
           if (start < end) onLoadMore(start, end);
+          if (this.props.onXScaleChange) {
+            this.props.onXScaleChange(xScale);
+          }
         }
       );
     });
@@ -1067,6 +1079,9 @@ class ChartCanvas extends Component {
   componentWillMount() {
     const { fullData, ...state } = resetChart(this.props, true);
     this.setState(state);
+    if (this.props.onXScaleChange) {
+      this.props.onXScaleChange(state.xScale);
+    }
     this.fullData = fullData;
   }
   componentWillReceiveProps(nextProps) {
@@ -1150,7 +1165,11 @@ class ChartCanvas extends Component {
 			*/
       this.clearThreeCanvas();
 
-      this.setState(state);
+      this.setState(state, () => {
+        if (this.props.onXScaleChange) {
+          this.props.onXScaleChange(state.xScale);
+        }
+      });
     }
     this.fullData = fullData;
   }
@@ -1351,6 +1370,7 @@ ChartCanvas.propTypes = {
   onSelect: PropTypes.func,
   maintainPointsPerPixelOnResize: PropTypes.bool,
   disableInteraction: PropTypes.bool,
+  onXScaleChange: PropTypes.func,
 };
 
 ChartCanvas.defaultProps = {
